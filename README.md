@@ -23,29 +23,31 @@ or from PyPI:
 pip install glpk
 ```
 
-Download the ZIP file of this repository from this link: https://github.com/zahraghh/Two_Stage_SP/tree/JOSS.
+Download the ZIP file of this repository from this link: https://github.com/zahraghh/multi_objective_optimization
+
 
 Unzip the "Two_Stage_SP-JOSS" folder and locally install the package using the pip command. The /path/to/Two_Stage_SP-JOSS is the path to the "Two_Stage_SP-JOSS" folder that contains a setup.py file. 
 ```
-pip install -e /path/to/Two_Stage_SP-JOSS
+pip install -e /path/to/multi_objective_optimization
+
 ```
 
-To use this repository, you can directly compile the "main_two_stage_SP.py" code in the tests\test1 folder.
+To use this repository, you can directly compile the "main.py" code in the tests\test1 folder.
 
-Have a look at the "tests\test1" folder. Four files are needed to compile the "main_two_stage_SP.py" code successfully:
+Have a look at the "tests\test1" folder. Four files are needed to compile the "main.py" code successfully:
 1. "Energy Components" folder containing energy components characteristics
 2. "editable_values.csv" file containing variable inputs of the package
 3. "total_energy_demands.csv" file containing the aggregated hourly electricity, heating, and cooling demands of a group of buildings
-4. "main_two_stage_SP.py" file to be compiled and run the two-stage stochastic programming optimization
+4. "main.py" file to be compiled and run the two-stage stochastic programming optimization
 
 ## How to Use this Repository?
-After the package is installed, we can use Two_Stage_SP-JOSS\tests\Test folder that contains the necessary help files ("Energy Components" folder, "editable_values.csv', "total_energy_demands.csv") to have our main.py code in it. We can first download the weather files, calculate the global titlted irradiance, and quantify distributions of solar irradiance and wind speed by writing a similar code in main.py: 
+After the package is installed, we can use multi_objective_optimization\tests\Test folder that contains the necessary help files ("Energy Components" folder, "editable_values.csv', "total_energy_demands.csv") to have our main.py code in it. We can first download the weather files, calculate the global titlted irradiance, and quantify distributions of solar irradiance and wind speed by writing a similar code in main.py: 
 ```
 import os
 import sys
 import pandas as pd
 import csv
-from Two_Stage_SP import download_windsolar_data, GTI,uncertainty_analysis
+from multi_objective_optimization import download_windsolar_data, GTI,uncertainty_analysis
 if __name__ == "__main__":
     #Reading the data from the Weather Data Analysis section of the editable_values.csv
     editable_data_path =os.path.join(sys.path[0], 'editable_values.csv')
