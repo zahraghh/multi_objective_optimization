@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import csv
 import PySAM.ResourceTools as tools
+import ssl
 def download_meta_data(city):
     editable_data_path =os.path.join(sys.path[0], 'editable_values.csv')
     editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
@@ -47,14 +48,16 @@ def download_meta_data(city):
     for year in range(int(editable_data['starting_year']),int(editable_data['ending_year'])+1):
         # Declare url string
         url = 'https://developer.nrel.gov/api/solar/nsrdb_psm3_download.csv?wkt=POINT({lon}%20{lat})&names={year}&leap_day={leap}&interval={interval}&utc={utc}&full_name={name}&email={email}&affiliation={affiliation}&mailing_list={mailing_list}&reason={reason}&api_key={api}&attributes={attr}'.format(year=year, lat=lat, lon=lon, leap=leap_year, interval=interval, utc=utc, name=your_name, email=your_email, mailing_list=mailing_list, affiliation=your_affiliation, reason=reason_for_use, api=api_key, attr=attributes)
+        if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
+            ssl._create_default_https_context = ssl._create_unverified_context
         # Return just the first 2 lines to get metadata:
-        try:
-            info = pd.read_csv(url)
-            info_name =city+'_'+str(lat)+'_'+str(lon)+'_psm3_60_'+str(year)+'.csv'
-            save_path = os.path.join(sys.path[0],str(city))
-            info.to_csv(os.path.join(save_path,info_name), index = False)
-            print('Downlaoding meteorlogical data of '+city+' in '+str(year))
-        except:
-            print('ERROR bad request: Data cannnot be downloaded from NSRDB')
-            print('Please, check values of 16 ("Longitude") to 23 ("SAM API key") rows in EditableFile.csv file')
-            sys.exit()
+        #try:
+        info = pd.read_csv(url)
+        info_name =city+'_'+str(lat)+'_'+str(lon)+'_psm3_60_'+str(year)+'.csv'
+        save_path = os.path.join(sys.path[0],str(city))
+        info.to_csv(os.path.join(save_path,info_name), index = False)
+        print('Downlaoding meteorlogical data of '+city+' in '+str(year))
+        #except:
+            #print('ERROR bad request: Data cannnot be downloaded from NSRDB')
+            #print('Please, check values of 16 ("Longitude") to 23 ("SAM API key") rows in EditableFile.csv file')
+            #sys.exit()
