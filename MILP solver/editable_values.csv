@@ -4,7 +4,7 @@ Names (do not change this column),Values,Instruction,Where it's used
 #########################################################################,,,
 Weather data download and analysis,no,"Downloading data for the city from NSRDB? (yes or no) if yes, please, fill rows 15 to 28. The yes/no question is case sensitive. Please, make sure 'yes' is written without a space or capital letter.",Setting up the framework
 Generate Scenarios,no,"Generating scenarios based on the probability distributions? (yes or no) if yes, please, fill row 32 to 34.  The yes/no question is case sensitive. Please, make sure 'yes' is written without a space or capital letter.",Setting up the framework
-Perfrom scenario reduction,no,"Scneario reduction using k-medoid and PCA? (yes or no) if yes, please, fill rows  33 and 34. The yes/no question is case sensitive. Please, make sure 'yes' is written without a space or capital letter.",Setting up the framework
+Perfrom scenario reduction,yes,"Scneario reduction using k-medoid and PCA? (yes or no) if yes, please, fill rows  33 and 34. The yes/no question is case sensitive. Please, make sure 'yes' is written without a space or capital letter.",Setting up the framework
 Search optimum PCA,no,"Finding the optimum number of features in Principal component analysis (PCA)? (yes or no) if yes, row 7, 'Perfrom scenario reduction' must be yes.  if yes, a figure that can help to fill row 33 will be generated in the directory. The yes/no question is case sensitive. Please, make sure 'yes' is written without a space or capital letter.",Setting up the framework
 Search optimum clusters,no,"Finding the optimum number of clusters in k-medoid? (yes or no) if yes, a figure that can help to fill row 34 will be generated in the directory. if yes, row 7, 'Perfrom scenario reduction' must be yes.  The yes/no question is case sensitive. Please, make sure 'yes' is written without a space or capital letter.",Setting up the framework
 Perform multi-objective optimization,yes,"Perfroming the two-stage SP optimization using NSGA-II and CPLEX solver? (yes or no) if yes, please, fill rows 38 to 56.  The yes/no question is case sensitive. Please, make sure 'yes' is written without a space or capital letter.",Setting up the framework
@@ -20,7 +20,7 @@ reason_for_use,Academic,Add the reason you want to download the meteorological d
 your_affiliation,University+of+Utah,"Add your affiliation without space (e.g., University+of+Utah)",Weather data download from  the NSRDB
 your_email,zahra.ghaemi8@gmail.com,Add your email address,Weather data download from  the NSRDB
 mailing_list,yes,Do you want to be added to NSRDB  mailing list? ,Weather data download from  the NSRDB
-SAM API key,VvxelFF4TmapHSEIAak9J6IxyyG7QKKgK3dYDd0I,Add the SAM API key. You can signup here with your email address to get a key: https://developer.nrel.gov/signup/,Weather data download from  the NSRDB
+SAM API key,j3ipvzzCVXVdwlaBDZwuX3SxEFgtPNWonjoPUBiy,Add the SAM API key. You can signup here with your email address to get a key: https://developer.nrel.gov/signup/,Weather data download from  the NSRDB
 Altitude,1288,Altitude of the case study's city (m),Weather data analysis
 solar_tilt,35,Tilt degree of solar panels,Weather data analysis
 solar_azimuth,180,Azimuth degree of solar panels,Weather data analysis
