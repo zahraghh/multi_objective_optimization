@@ -1,5 +1,5 @@
 # Multi-objective Optimization of Operation Planning
-This repository provides a framework to perform multi-objective optimization of operation planning of district energy system. In this framework, we consider uncertainties in energy demands, solar irradiance, wind speed, and electricity emission factors. This framework optimizes the operation planning of energy components to minimize the operating cost and CO<sub>2</sub> emissions. Natural gas boilers, combined heating and power (CHP), solar photovoltaic (PV), wind turbines, batteries, and the grid are the energy components considered in this repository. 
+This repository provides a framework to perform multi-objective optimization of operation planning of district energy system. In this framework, we consider uncertainties in energy demands, solar irradiance, wind speed, and electricity emission factors using Monte Carlo simulation. In this frameworkm, the operation planning of energy components are optimized to minimize the operating cost and CO<sub>2</sub> emissions. Natural gas boilers, combined heating and power (CHP), solar photovoltaic (PV), wind turbines, batteries, and the grid are the energy components considered in this repository. 
 
 ## How Can I Install this Repository?
 To use this repository, you need to use either Python or Anaconda. You can download and install Python using the following link https://www.python.org/downloads/ or Anaconda using the following link https://docs.anaconda.com/anaconda/install/. 
@@ -26,33 +26,33 @@ pip install glpk
 Download the ZIP file of this repository from this link: https://github.com/zahraghh/multi_objective_optimization
 
 
-Unzip the "Two_Stage_SP-JOSS" folder and locally install the package using the pip command. The /path/to/Two_Stage_SP-JOSS is the path to the "Two_Stage_SP-JOSS" folder that contains a setup.py file. 
+Unzip the "multi_objective_optimization-Journal" folder and locally install the package using the pip command. The /path/to/multi_objective_optimization-Journal is the path to the "multi_objective_optimization-Journal" folder that contains a setup.py file. 
 ```
-pip install -e /path/to/multi_objective_optimization
+pip install -e /path/to/multi_objective_optimization-Journal
 
 ```
 
-To use this repository, you can directly compile the "main.py" code in the tests\test1 folder.
+To use this repository, you can directly compile the "MILP_solver.py" code in the "MILP solver test" folder using GLPK solver or "NSGA-II.py" code in the "NSGA-II algorithm test" folder using NSGA-II algorithm. 
 
-Have a look at the "tests\test1" folder. Four files are needed to compile the "main.py" code successfully:
-1. "Energy Components" folder containing energy components characteristics
-2. "editable_values.csv" file containing variable inputs of the package
-3. "total_energy_demands.csv" file containing the aggregated hourly electricity, heating, and cooling demands of a group of buildings
-4. "main.py" file to be compiled and run the two-stage stochastic programming optimization
+Have a look at the "MILP solver test" folder. Four files are needed to compile the "MILP_solver.py" code successfully:
+1. "Energy Components" folder containing energy components characteristics,
+2. "editable_values.csv" file containing variable inputs of the package,
+3. "total_energy_demands.csv" file containing the aggregated hourly electricity, heating, and cooling demands of a group of buildings, and
+4. "MILP_solver.py" file to be compiled and run the two-stage stochastic programming optimization
+
+The same applied to the "NSGA-II algorithm test" folder, where "NSGA-II.py" file is used instead of "MILP_solver.py" file
 
 ## How to Use this Repository?
-After the package is installed, we can use multi_objective_optimization\tests\Test folder that contains the necessary help files ("Energy Components" folder, "editable_values.csv', "total_energy_demands.csv") to have our main.py code in it. We can first download the weather files, calculate the global titlted irradiance, and quantify distributions of solar irradiance and wind speed by writing a similar code in main.py: 
+After the package is installed, we can use multi_objective_optimization\"MILP solver test" or multi_objective_optimization\"NSGA-II algorithm test" folder that contains the necessary help files ("Energy Components" folder, "editable_values.csv', "total_energy_demands.csv") to have our  "MILP_solver.py" or  "NSGA-II.py" file code in it. 
+
+We can first download the weather files, calculate the global titlted irradiance: 
 ```
 import pandas as pd
-import math
 import os
 import sys
-import pandas as pd
 import csv
-from pathlib import Path
-import json
 import multi_operation_planning
-from multi_operation_planning import download_windsolar_data, GTI 
+from multi_operation_planning import download_windsolar_data, GTI
 ###Decison Variables###
 path_test =  os.path.join(sys.path[0])
 editable_data_path =os.path.join(path_test, 'editable_values.csv')
@@ -61,22 +61,18 @@ num_scenarios = int(editable_data['num_scenarios'])
 if __name__ == "__main__":
     city_DES =str(editable_data['city'])
     #Do we need to generate the meteorlogical data and their distributions?
-    if editable_data['Weather data download and analysis']=='yes':
-        download_windsolar_data.download_meta_data(city_DES)
-        #Calculating the  global tilted irradiance on a surface in the City
-        GTI.GTI_results(city_DES,path_test)
+    download_windsolar_data.download_meta_data(city_DES)
+    #Calculating the  global tilted irradiance on a surface in the City
+    GTI.GTI_results(city_DES,path_test)
 ```
-The outcome of this code is a new folder with the name of the city in  the editable_values.csv. If you haven't change the editable_values.csv, the folder name is Salt Lake City, which contains the needed weather parameters. 
+The outcome of this code is a new folder with the name of the city in  the editable_values.csv. If you haven't change the editable_values.csv, the folder name is Salt Lake City, which contains the needed weather parameters to perfrom the optimization. 
 
-After the weather data is generated, we can perfrom scenario generation using Monte Carlo simulation and scenario reduction using k-median algorithm to reduce the number of scenarios:
+After the weather data is generated, we can perfrom scenario generation using Monte Carlo simulation and scenario reduction using k-mean algorithm to reduce the number of scenarios:
 ```
-import pandas as pd
-import math
 import os
 import sys
 import pandas as pd
 import csv
-from pathlib import Path
 import json
 import multi_operation_planning
 from multi_operation_planning import scenario_generation_operation, uncertainty_analysis_operation
@@ -89,12 +85,13 @@ if __name__ == "__main__":
     city_DES =str(editable_data['city'])
     #Do we need to generate scenarios for uncertainties in ...
     #energy demands,solar irradiance, wind speed, and electricity emissions?
-    if editable_data['Generate Scenarios']=='yes':
-        scenario_generation_operation.scenario_generation_results(path_test)
-        generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
-        with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
-            json.dump(generated_scenario, fp)
+    scenario_generation_operation.scenario_generation_results(path_test)
+    generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+    with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
+        json.dump(generated_scenario, fp)
 ```
+The outcome of this code is a new folder, which is called "Scenario Generation". In "Scenario Generation", there is a new folder with the name of the city in  the editable_values.csv. If you haven't change the editable_values.csv, the folder name is Salt Lake City, which contains the operation representative days. The number of representative days is "Cluster numbers" in the  editable_values.csv plus two extreme days (Cluster numbers+2). 
+
 After scenarios are generated and reduced, the selected representative days are located in Scenario Generation\City\Representative days folder. Then, we perfrom the optimization on these selected representative days:
 ```
 import pandas as pd
