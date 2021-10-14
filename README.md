@@ -96,7 +96,7 @@ if __name__ == "__main__":
 The outcome of scenarios generation and reduction is the selected representative days that are located in Scenario Generation\City\Representative days folder. The number of representative days is "Cluster numbers" in the  editable_values.csv plus two extreme days (Cluster numbers+2). Another outcome of this step is a JSON file in the main folder "UA_operation_num_scenarios", where num_scenarios is stated in editable_values.csv.
 
 ### Part 3: Optimization of District Energy System
-After scenarios are generated and reduced, the selected representative days are located in Scenario Generation\City\Representative days folder. Then, we perfrom the optimization on these selected representative days:
+After scenarios are generated and reduced, the selected representative days are located in Scenario Generation\City\Representative days folder. Then, we perfrom the optimization on these selected representative days using **MILP solver**:
 ```
 import os
 import sys
@@ -114,7 +114,7 @@ if __name__ == "__main__":
     MILP_results_repdays.results_repdays(path_test)
 ```
 
-or using the NSGA-II algorithm to perfrom the multi-objective optimization:
+or using the **NSGA-II algorithm** to perfrom the multi-objective optimization:
 ```
 import os
 import sys
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 After the optimization is performed (migh take a few minutes to few hours based on the number of iterations and scenarios), a new folder (City_name_operation_MILP/EA_EF_...)  is generated that contains the two csv files for each day of generated scenarios for each representative day. 
 
 ### All Parts together
-We can also perfrom the three parts together using the MILP solver:
+We can also perfrom the three parts together using the **MILP solver**:
 ```
 ### Performing Multi-objective Optimization of Operation planning of District Energy systems ###
 ### Using MILP Solver (GLPK) ###
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         MILP_results_repdays.results_repdays(path_test)
 
 ```
-or using the NSGA-II algorithm:
+or using the **NSGA-II algorithm**:
 ```
 ### Performing Multi-objective Optimization of Operation planning of District Energy systems ###
 ### Using NSGA-II Algorithm ###
