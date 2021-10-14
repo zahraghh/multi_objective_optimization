@@ -45,7 +45,7 @@ The same applied to the "NSGA-II algorithm test" folder, where "NSGA-II.py" file
 ## How to Use this Repository?
 After the package is installed, we can use multi_objective_optimization\"MILP solver test" or multi_objective_optimization\"NSGA-II algorithm test" folder that contains the necessary help files ("Energy Components" folder, "editable_values.csv', "total_energy_demands.csv") to have our  "MILP_solver.py" or  "NSGA-II.py" file code in it. 
 
-### Part 1: downloading weather data###
+### Part 1:  Weather Data Analysis 
 We can first download the weather files, calculate the global titlted irradiance: 
 ```
 import pandas as pd
@@ -67,6 +67,8 @@ if __name__ == "__main__":
     GTI.GTI_results(city_DES,path_test)
 ```
 The outcome of this code is a new folder with the name of the city in  the editable_values.csv. If you haven't change the editable_values.csv, the folder name is Salt Lake City, which contains the needed weather parameters to perfrom the optimization. 
+
+### Part 2:  Scenario Generation/Reduction
 
 After the weather data is generated, we can perfrom scenario generation using Monte Carlo simulation and scenario reduction using k-mean algorithm to reduce the number of scenarios:
 ```
@@ -93,6 +95,7 @@ if __name__ == "__main__":
 ```
 The outcome of scenarios generation and reduction is the selected representative days that are located in Scenario Generation\City\Representative days folder. The number of representative days is "Cluster numbers" in the  editable_values.csv plus two extreme days (Cluster numbers+2). Another outcome of this step is a JSON file in the main folder "UA_operation_num_scenarios", where num_scenarios is stated in editable_values.csv.
 
+### Part 3: Optimization of District Energy System
 After scenarios are generated and reduced, the selected representative days are located in Scenario Generation\City\Representative days folder. Then, we perfrom the optimization on these selected representative days:
 ```
 import os
@@ -131,6 +134,7 @@ if __name__ == "__main__":
 
 After the optimization is performed (migh take a few minutes to few hours based on the number of iterations and scenarios), a new folder (City_name_operation_MILP/EA_EF_...)  is generated that contains the two csv files for each day of generated scenarios for each representative day. 
 
+### All Parts together
 We can also perfrom the three parts together using the MILP solver:
 ```
 ### Performing Multi-objective Optimization of Operation planning of District Energy systems ###
