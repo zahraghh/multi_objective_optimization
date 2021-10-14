@@ -38,9 +38,8 @@ Have a look at the "MILP solver test" folder. Four files are needed to compile t
 1. "Energy Components" folder containing energy components characteristics,
 2. "editable_values.csv" file containing variable inputs of the package,
 3. "total_energy_demands.csv" file containing the aggregated hourly electricity, heating, and cooling demands of a group of buildings, and
-4. "MILP_solver.py" file to be compiled and run the two-stage stochastic programming optimization
+4. "MILP_solver.py"/"NSGA-II.py" file to be compiled and run the multi-objective optimization.
 
-The same applied to the "NSGA-II algorithm test" folder, where "NSGA-II.py" file is used instead of "MILP_solver.py" file
 
 ## How to Use this Repository?
 After the package is installed, we can use multi_objective_optimization\"MILP solver test" or multi_objective_optimization\"NSGA-II algorithm test" folder that contains the necessary help files ("Energy Components" folder, "editable_values.csv', "total_energy_demands.csv") to have our  "MILP_solver.py" or  "NSGA-II.py" file code in it. 
