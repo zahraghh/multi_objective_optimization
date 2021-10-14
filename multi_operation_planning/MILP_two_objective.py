@@ -20,9 +20,9 @@ electricity_prices =  float(editable_data['electricity_price'])/100 #6.8cents/kW
 def CHP(CAP_CHP_elect_size,F_CHP_size):
     BTUtokWh_convert = 0.000293071 # 1BTU = 0.000293071 kWh
     mmBTutoBTU_convert = 10**6
-    UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
-    UPV_NG = float(editable_data['UPV_NG']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 21 utah
-    UPV_elect = float(editable_data['UPV_elect']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 21 utah
+    #UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
+    #UPV_NG = float(editable_data['UPV_NG']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 21 utah
+    #UPV_elect = float(editable_data['UPV_elect']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 21 utah
     NG_prices = float(editable_data['price_NG'])/293.001 #Natural gas price at UoU $/kWh
     lifespan_chp = int(CHP_component['Lifespan (year)'][0])
     ###CHP system###
@@ -39,7 +39,8 @@ def CHP(CAP_CHP_elect_size,F_CHP_size):
         E_CHP = F_CHP_size*eff_CHP_elect/100 #Electricty generation of CHP system kWh
         Q_CHP = F_CHP_size*eff_CHP_therm/100 #Heat generation of CHP system kWh
         #salvage_CHP = (lifespan_chp-lifespan_project+lifespan_chp*int(lifespan_project/lifespan_chp))/lifespan_chp
-        invest_CHP = IC_CHP*CAP_CHP_elect_size #Investment cost of the CHP system $
+        #invest_CHP = IC_CHP*CAP_CHP_elect_size #Investment cost of the CHP system $
+        invest_CHP = 1
         OPC_CHP = NG_prices*F_CHP_size + OM_CHP*E_CHP#O&M cost of CHP system $
         OPE_CHP = gamma_CHP*E_CHP # O&M emission of CHP system kg CO2
         #print('CHP',CAP_CHP_elect_size,IC_CHP,eff_CHP_therm,eff_CHP_elect,OM_CHP,gamma_CHP)
@@ -47,8 +48,8 @@ def CHP(CAP_CHP_elect_size,F_CHP_size):
 def NG_boiler(F_boilers,_CAP_boiler):
     BTUtokWh_convert = 0.000293071 # 1BTU = 0.000293071 kWh
     mmBTutoBTU_convert = 10**6
-    UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
-    UPV_NG = float(editable_data['UPV_NG']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 21 utah
+    #UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
+    #UPV_NG = float(editable_data['UPV_NG']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 21 utah
     NG_prices = float(editable_data['price_NG'])/293.001 #Natural gas price at UoU $/kWh
     CAP_boiler = _CAP_boiler
     index_boiler = list(boiler_component['CAP_boiler (kW)']).index(CAP_boiler)
@@ -67,8 +68,8 @@ def NG_boiler(F_boilers,_CAP_boiler):
 def wind_turbine_calc(A_swept_size,hour_of_day,electricity_demand_max,V_wind_now,V_max):
     cut_in_wind_speed = wind_component['Cut-in Speed'][0] #2.5 m/s is the minimum wind speed to run the wind turbines
     lifespan_wind = int(wind_component['Lifespan (year)'][0]) #lifespan of wind turbines
-    lifespan_project = float(editable_data['lifespan_project']) #life span of DES
-    UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
+    #lifespan_project = float(editable_data['lifespan_project']) #life span of DES
+    #UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
     ###Wind Turbine###
     index_wind = list(wind_component['Swept Area m^2']).index(A_swept_size)
     CAP_wind = wind_component['Rated Power kW'][index_wind]
@@ -79,14 +80,15 @@ def wind_turbine_calc(A_swept_size,hour_of_day,electricity_demand_max,V_wind_now
     if V_wind_now<cut_in_wind_speed:
         V_wind_now = 0
     E_wind = 0.5*C_p*rho*A_swept_size*V_wind_now**3/1000 #Wind generation from wind Turbine (kW) CHANGE V_wind
-    salvage_wind = 1-(lifespan_wind-lifespan_project+lifespan_wind*int(lifespan_project/lifespan_wind))/lifespan_wind
-    invest_wind = (IC_wind + OM_wind*UPV_maintenance)*CAP_wind #CAP_wind in kW + investment cost of wind in $
+    #salvage_wind = 1-(lifespan_wind-lifespan_project+lifespan_wind*int(lifespan_project/lifespan_wind))/lifespan_wind
+    #invest_wind = (IC_wind + OM_wind*UPV_maintenance)*CAP_wind #CAP_wind in kW + investment cost of wind in $
+    invest_wind = 1
     #print('wind',CAP_wind,C_p,rho,A_swept_size,IC_wind,OM_wind)
     return E_wind, invest_wind
 def solar_pv_calc(A_surf_size,hour_of_day,electricity_demand_max,G_T_now,GT_max):
     lifespan_solar = int(solar_component['Lifespan (year)'][0]) #lifespan of solar PV System
-    lifespan_project = float(editable_data['lifespan_project']) #life span of DES
-    UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
+    #lifespan_project = float(editable_data['lifespan_project']) #life span of DES
+    #UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
     ###Solar PV###
     IC_solar = solar_component['Investment cost ($/Wdc)'][0] #Solar PV capital investment cost is 1.75$/Wdc
     OM_solar = solar_component['Fixed solar PV O&M cost ($/kW-year)'][0] #fixed solar PV O&M cost 18$/kW-year
@@ -95,14 +97,15 @@ def solar_pv_calc(A_surf_size,hour_of_day,electricity_demand_max,G_T_now,GT_max)
     eff_inverter = solar_component['Inverter efficiency'][0] #Inverter efficiency
     CAP_solar = PD_solar*A_surf_size/1000
     A_surf_max = electricity_demand_max/(GT_max*eff_module*eff_inverter/1000)
-    salvage_solar = 1-(lifespan_solar-lifespan_project+lifespan_solar*int(lifespan_project/lifespan_solar))/lifespan_solar
+    #salvage_solar = 1-(lifespan_solar-lifespan_project+lifespan_solar*int(lifespan_project/lifespan_solar))/lifespan_solar
     E_solar = A_surf_size*G_T_now*eff_module*eff_inverter/1000 #Solar generation from PV system (kWh) CHANGE G_T
-    invest_solar  = (IC_solar*1000*salvage_solar+OM_solar*UPV_maintenance)*CAP_solar #CAP_solar in kW + investment cost of solar in $
+    #invest_solar  = (IC_solar*1000*salvage_solar+OM_solar*UPV_maintenance)*CAP_solar #CAP_solar in kW + investment cost of solar in $
+    invest_solar=1
     #print('solar',IC_solar,OM_solar,eff_module,eff_inverter,A_surf_size)
     return E_solar,invest_solar,A_surf_max
 def battery_calc(electricity_demand_bat,hour,E_bat_,_CAP_battery,G_T_now,V_wind_now):
-    UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
-    lifespan_project = float(editable_data['lifespan_project']) #life span of DES
+    #UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
+    #lifespan_project = float(editable_data['lifespan_project']) #life span of DES
     deltat = 1 #hour for batteries
     CAP_battery = _CAP_battery
     index_battery =  list(battery_component['CAP_battery (kWh)']).index(CAP_battery)
@@ -130,7 +133,8 @@ def battery_calc(electricity_demand_bat,hour,E_bat_,_CAP_battery,G_T_now,V_wind_
         E_bat_new = E_bat - 1/eff_bat_disch*P_ch_dis_old*deltat
     IC_battery =  battery_component['Investment cost ($/kW)'][index_battery] #Battery capital investment cost is 2338 $/kW
     OM_battery = battery_component['Fixed O&M cost  $/kW-year'][index_battery]#fixed battery O&M cost 6$/kW-year
-    invest_battery = (IC_battery*lifespan_project/lifespan_battery +OM_battery*UPV_maintenance)*CAP_battery
+    #invest_battery = (IC_battery*lifespan_project/lifespan_battery +OM_battery*UPV_maintenance)*CAP_battery
+    invest_battery = 1
     #print('battery',_CAP_battery,IC_battery,OM_battery,eff_bat_disch,eff_bat_ch,bat_dod)
     return E_bat_new,invest_battery,electricity_demand
 ###Decison Variables Stage 2###

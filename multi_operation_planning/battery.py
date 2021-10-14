@@ -12,8 +12,8 @@ def battery_calc(electricity_demand_bat,hour,E_bat_,_A_solar,_A_swept,_CAP_batte
     editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
     components_path = os.path.join(path_test,'Energy Components')
     battery_component = pd.read_csv(os.path.join(components_path,'battery.csv'))
-    UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
-    lifespan_project = float(editable_data['lifespan_project']) #life span of DES
+    #UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
+    #lifespan_project = float(editable_data['lifespan_project']) #life span of DES
     deltat = 1 #hour for batteries
     A_swept = _A_swept #Swept area of rotor m^2
     A_solar = _A_solar #Solar durface m^2 --> gives 160*A_solar W solar & needs= A_solar/0.7 m^2 rooftop
@@ -44,5 +44,6 @@ def battery_calc(electricity_demand_bat,hour,E_bat_,_A_solar,_A_swept,_CAP_batte
         E_bat_new = E_bat - 1/eff_bat_disch*P_ch_dis_old*deltat
     IC_battery =  battery_component['Investment cost ($/kW)'][index_battery] #Battery capital investment cost is 2338 $/kW
     OM_battery = battery_component['Fixed O&M cost  $/kW-year'][index_battery]#fixed battery O&M cost 6$/kW-year
-    invest_battery = (IC_battery*lifespan_project/lifespan_battery +OM_battery*UPV_maintenance)*CAP_battery
+    #invest_battery = (IC_battery*lifespan_project/lifespan_battery +OM_battery*UPV_maintenance)*CAP_battery
+    invest_battery=1
     return E_bat_new,invest_battery,electricity_demand
