@@ -90,39 +90,45 @@ if __name__ == "__main__":
     with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
         json.dump(generated_scenario, fp)
 ```
-The outcome of this code is a new folder, which is called "Scenario Generation". In "Scenario Generation", there is a new folder with the name of the city in  the editable_values.csv. If you haven't change the editable_values.csv, the folder name is Salt Lake City, which contains the operation representative days. The number of representative days is "Cluster numbers" in the  editable_values.csv plus two extreme days (Cluster numbers+2). 
+The outcome of scenarios generation and reduction is the selected representative days that are located in Scenario Generation\City\Representative days folder. The number of representative days is "Cluster numbers" in the  editable_values.csv plus two extreme days (Cluster numbers+2). Another outcome of this step is a JSON file in the main folder "UA_operation_num_scenarios", where num_scenarios is stated in editable_values.csv.
 
 After scenarios are generated and reduced, the selected representative days are located in Scenario Generation\City\Representative days folder. Then, we perfrom the optimization on these selected representative days:
 ```
-import pandas as pd
-import math
 import os
 import sys
 import pandas as pd
 import csv
-from pathlib import Path
-import json
-from platypus import NSGAII, Problem, Real, Integer, InjectedPopulation,GAOperator,HUX, BitFlip, SBX,PM,PCX,nondominated,ProcessPoolEvaluator
-# I use platypus library to solve the muli-objective optimization problem:
-# https://platypus.readthedocs.io/en/latest/getting-started.html
 import multi_operation_planning
-from multi_operation_planning import NSGA_two_objectives
-
+from multi_operation_planning import MILP_two_objective, MILP_results_repdays
 ###Decison Variables###
 path_test =  os.path.join(sys.path[0])
 editable_data_path =os.path.join(path_test, 'editable_values.csv')
 editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
 num_scenarios = int(editable_data['num_scenarios'])
 if __name__ == "__main__":
-    city_DES =str(editable_data['city'])
-    #Do we need to generate scenarios for uncertainties in ...
-    #energy demands,solar irradiance, wind speed, and electricity emissions?
-    #Do we need to perfrom the multi-objective optimization of operation planning using NSGA-II?
-    if editable_data['Perform multi-objective optimization']=='yes':
-        print('Perfrom multi-objective optimization of operation planning')
-        NSGA_two_objectives.NSGA_Operation(path_test)
+    print('Perfrom multi-objective optimization of operation planning')
+    MILP_results_repdays.results_repdays(path_test)
 ```
-After the optimization is performed (migh take a few hours based on the number of iterations), a new folder (City_name_Discrete_EF_...)  is generated that contains the two csv files, sizing of energy components and objective values for the Pareto front.  using MILP
+
+or using the NSGA-II algorithm to perfrom the multi-objective optimization:
+```
+import os
+import sys
+import pandas as pd
+import csv
+import multi_operation_planning
+from multi_operation_planning import NSGA_two_objectives
+###Decison Variables###
+path_test =  os.path.join(sys.path[0])
+editable_data_path =os.path.join(path_test, 'editable_values.csv')
+editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
+num_scenarios = int(editable_data['num_scenarios'])
+if __name__ == "__main__":
+    print('Perfrom multi-objective optimization of operation planning')
+    NSGA_two_objectives.NSGA_Operation(path_test)
+```
+
+After the optimization is performed (migh take a few minutes to few hours based on the number of iterations and scenarios), a new folder (City_name_operation_MILP/EA_EF_...)  is generated that contains the two csv files for each day of generated scenarios for each representative day. 
 
 We can also perfrom the three parts together and geterate the plots using the following code:
 ```
