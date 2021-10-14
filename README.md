@@ -46,7 +46,7 @@ The same applied to the "NSGA-II algorithm test" folder, where "NSGA-II.py" file
 After the package is installed, we can use multi_objective_optimization\"MILP solver test" or multi_objective_optimization\"NSGA-II algorithm test" folder that contains the necessary help files ("Energy Components" folder, "editable_values.csv', "total_energy_demands.csv") to have our  "MILP_solver.py" or  "NSGA-II.py" file code in it. 
 
 ### Part 1:  Weather Data Analysis 
-We can first download the weather files, calculate the global titlted irradiance: 
+We can first download the weather files and calculate the global titlted irradiance: 
 ```
 import pandas as pd
 import os
