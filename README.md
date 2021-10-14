@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
 After the optimization is performed (migh take a few minutes to few hours based on the number of iterations and scenarios), a new folder (City_name_operation_MILP/EA_EF_...)  is generated that contains the two csv files for each day of generated scenarios for each representative day. 
 
-We can also perfrom the three parts together and geterate the plots using the following code:
+We can also perfrom the three parts together using the MILP solver:
 ```
 ### Performing Multi-objective Optimization of Operation planning of District Energy systems ###
 ### Using MILP Solver (GLPK) ###
@@ -138,9 +138,7 @@ import os
 import sys
 import pandas as pd
 import csv
-from pathlib import Path
 import json
-from pyomo.opt import SolverFactory
 import multi_operation_planning
 from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation,MILP_two_objective,MILP_results_repdays
 editable_data_path =os.path.join(sys.path[0], 'editable_values.csv')
@@ -165,27 +163,18 @@ if __name__ == "__main__":
     if editable_data['Perform multi-objective optimization']=='yes':
         print('Perfrom multi-objective optimization of operation planning')
         MILP_results_repdays.results_repdays(path_test)
-```
-After the optimization is performed (migh take a few hours based on the number of iterations), a new folder (City_name_Discrete_EF_...)  is generated that contains the two csv files, sizing of energy components and objective values for the Pareto front.  using NSGA-II
 
-We can also perfrom the three parts together and geterate the plots using the following code:
+```
+or using the NSGA-II algorithm:
 ```
 ### Performing Multi-objective Optimization of Operation planning of District Energy systems ###
 ### Using NSGA-II Algorithm ###
 import pandas as pd
-import matplotlib.pyplot as plt
-import csv
 import math
-import datetime as dt
 import os
 import sys
-import pandas as pd
 import csv
-from pathlib import Path
 import json
-from platypus import NSGAII, Problem, Real, Integer, InjectedPopulation,GAOperator,HUX, BitFlip, SBX,PM,PCX,nondominated,ProcessPoolEvaluator
-# I use platypus library to solve the muli-objective optimization problem:
-# https://platypus.readthedocs.io/en/latest/getting-started.html
 import multi_operation_planning
 from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation,NSGA_two_objectives
 ###Decison Variables###
@@ -211,10 +200,6 @@ if __name__ == "__main__":
     if editable_data['Perform multi-objective optimization']=='yes':
         print('Perfrom multi-objective optimization of operation planning')
         NSGA_two_objectives.NSGA_Operation(path_test)
-
-
-
 ```
-
 ## What Can I change?
 Three sets of input data are present that a user can change to test a new/modified case study.
