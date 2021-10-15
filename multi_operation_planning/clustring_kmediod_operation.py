@@ -143,10 +143,9 @@ def kmedoid_clusters(path_test):
         clusters['cluster centers '+str(center)]= kmedoids.cluster_centers_[center]
         clusters_list.append(kmedoids.cluster_centers_[center].tolist())
     for scenario in range(len(A_scaled)):
-        A_scaled_list[scenario]=A_scaled[scenario].tolist()
-        #print('here', len(A_scaled_list[scenario]),standardization_data.inverse_transform(A_scaled_list[scenario]),standardization_data.inverse_transform(A_scaled_list[scenario]).reshape(-1,1))
-        data_all_labels[kmedoids.labels_[scenario]].append(standardization_data.inverse_transform(A_scaled_list[scenario]).reshape(-1,1))
+        data_all_labels[kmedoids.labels_[scenario]].append(standardization_data.inverse_transform(A_scaled[scenario].reshape(1,-1)))
         #print(data_all_labels)
+        A_scaled_list[scenario]=A_scaled[scenario].tolist()
         A_scaled_list[scenario].insert(0,kmedoids.labels_[scenario])
         data_labels['labels '+str(scenario)]= A_scaled_list[scenario]
         label_list.append(A_scaled[scenario].tolist())
