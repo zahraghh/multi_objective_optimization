@@ -22,6 +22,7 @@ setup(
         'NREL-PySAM-stubs==2.2.2',
         'numpy==1.20.2',
         'pandas==1.2.3',
+        'scipy==1.4.0',
         'Pillow==8.2.0',
         'Platypus-Opt==1.0.4',
         'plotly==4.14.3',
