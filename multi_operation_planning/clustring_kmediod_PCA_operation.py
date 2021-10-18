@@ -332,3 +332,4 @@ def kmedoid_clusters(path_test):
         df_represent_days_modified.to_csv(os.path.join(representative_days_path,'Represent_days_modified_'+str(representative_day)+ '.csv'), index=False)
         clustring_kmean_forced.kmedoid_clusters(path_test)
     return data_all_labels
+ 
