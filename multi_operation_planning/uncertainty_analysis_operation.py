@@ -127,8 +127,8 @@ def UA_operation(num_scenarios):
     for cluster in range(num_clusters):
         for day in range(len(data_all_labels[cluster])):
             for hour in range(24):
-                demand_electricity_UA[cluster][hour].append(round(data_all_labels[cluster][day][hour],2))
-                demand_heating_UA[cluster][hour].append(round(data_all_labels[cluster][day][hour+24],2))
+                demand_electricity_UA[cluster][hour].append(round(data_all_labels[cluster][day][0][hour],2))
+                demand_heating_UA[cluster][hour].append(round(data_all_labels[cluster][day][0][hour+24],2))
     for cluster in range(num_clusters):
         for hour in range(24):
             generated_day[cluster][hour] = [random_generator(demand_electricity_UA[cluster][hour],num_scenarios),
