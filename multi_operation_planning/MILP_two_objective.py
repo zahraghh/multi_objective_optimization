@@ -492,9 +492,7 @@ def results_repdays(path_test):
     num_clusters = int(editable_data['Cluster numbers'])+2
     num_scenarios = int(editable_data['num_scenarios'])
     min_electricity = 0
-    max_electricity = int(editable_data['max_electricity'])
     min_heating = 0
-    max_heating = int(editable_data['max_heating'])
     with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json')) as f:
         scenario_generated = json.load(f)
     key_function = 'yes'
@@ -537,10 +535,6 @@ def results_repdays(path_test):
                     G_T_now=0
                 if  V_wind_now<0:
                     V_wind_now=0
-                #if heating_demand_now>max_heating:
-                #    heating_demand_now = max_heating
-                #if electricity_demand_now>max_electricity:
-                #    electricity_demand_now=max_electricity
                 results = Operation(hour, G_T_now,V_wind_now,E_bat[hour], electricity_demand_now, heating_demand_now,electricity_EF)
                 E_bat[hour+1] = results[10]
                 df_object_hour, df_operation_hour = results_extraction(hour, results,E_bat[hour])

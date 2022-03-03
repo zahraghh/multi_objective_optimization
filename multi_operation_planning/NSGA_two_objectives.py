@@ -106,9 +106,7 @@ def NSGA_Operation(path_test):
     df_demand = pd.DataFrame(data_demand)
     df_demand.to_csv(os.path.join(path_test , 'UA_demand.csv'))
     min_electricity = 0
-    max_electricity = int(editable_data['max_electricity'])
     min_heating = 0
-    max_heating = int(editable_data['max_heating'])
     class Operation_EA(Problem):
         def __init__(self,G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heating_demand_new,electricity_EF):
             super(Operation_EA, self).__init__(1, 2, 2)  #Problem(2, 2, 2) to create a problem with two decision variables, two objectives, and two constraints, respectively.
@@ -336,11 +334,7 @@ def NSGA_Operation(path_test):
                 if  G_T_now<0:
                     G_T_now=0
                 if  V_wind_now<0:
-                    V_wind_now=0                        
-                #if heating_demand_now>max_heating:
-                #    heating_demand_now = max_heating
-                #if electricity_demand_now>max_electricity:
-                #    electricity_demand_now=max_electricity
+                    V_wind_now=0
                 #print(G_T_now,V_wind_now,E_bat[hour], electricity_demand_now,heating_demand_now,electricity_EF)
                 problem= Operation_EA(G_T_now,V_wind_now,round(E_bat[hour],5), electricity_demand_now,heating_demand_now,electricity_EF)
                 #with ProcessPoolEvaluator(int(editable_data['num_processors'])) as evaluator: #max number of accepted processors is 61 by program/ I have 8 processor on my PC
