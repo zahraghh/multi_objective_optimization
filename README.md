@@ -2,7 +2,7 @@
 This repository provides a framework to perform multi-objective optimization of operation planning of district energy system using two methods, an MILP solver and NSGA-II algorithm. In this framework, we consider uncertainties in energy demands, solar irradiance, wind speed, and electricity emission factors using the Monte Carlo Markov chain (MCMC) method. In this framework, the operation planning of energy components are optimized to minimize the operating cost and CO<sub>2</sub> emissions. Natural gas boilers, combined heating and power (CHP), solar photovoltaic (PV), wind turbines, batteries, and the grid are the energy components considered in this framework. 
 
 ## How Can I Install this Repository?
-To use this repository, you need to use either Python or Anaconda. You can download and install Python using the following link https://www.python.org/downloads/ or Anaconda using the following link https://docs.anaconda.com/anaconda/install/. 
+To use this repository, you need to use either Python or Anaconda. You can download and install Python using the following link https://www.python.org/downloads/ or Anaconda using the following link https://docs.anaconda.com/anaconda/install/. We used Python 3.7 to perform the optimization.
 
 Two packages should be installed using the conda or PyPI.
 
@@ -12,7 +12,7 @@ conda install -c conda-forge scikit-learn-extra
 ```
 or from PyPI:
 ```
-pip install scikit-learn-extra
+pip3 install scikit-learn-extra
 ```
 2. install a solver that is free and open-source either in conda environmnet:
 ```
