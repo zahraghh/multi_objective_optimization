@@ -12,7 +12,7 @@ conda install -c conda-forge scikit-learn-extra
 ```
 or from PyPI:
 ```
-pip3 install scikit-learn-extra
+pip install scikit-learn-extra
 ```
 2. install a solver that is free and open-source either in conda environmnet:
 ```
@@ -28,7 +28,7 @@ Download the ZIP file of this repository from this link: https://github.com/zahr
 
 Unzip the "multi_objective_optimization-Journal" folder and locally install the package using the pip command. The /path/to/multi_objective_optimization-Journal is the path to the "multi_objective_optimization-Journal" folder that contains a setup.py file. 
 ```
-pip install -e /path/to/multi_objective_optimization-Journal
+pip3 install -e /path/to/multi_objective_optimization-Journal
 
 ```
 
