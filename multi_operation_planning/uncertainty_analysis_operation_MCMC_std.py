@@ -234,8 +234,6 @@ def UA_operation(num_scenarios):
                     if hour==0:
                         if generated_day[cluster][hour][0][scenario_0]<0:
                             generated_day[cluster][hour][0][scenario_0]=0
-                        elif round(generated_day[cluster][hour][0][scenario_0],3)>max_electricity:
-                            generated_day[cluster][hour][0][scenario_0] = max_electricity
                         s0.append(round(generated_day[cluster][hour][0][scenario_0],3))
                         accept_0 = rand_0
                     else:
