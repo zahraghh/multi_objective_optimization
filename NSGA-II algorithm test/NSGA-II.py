@@ -7,7 +7,7 @@ import sys
 import csv
 import json
 import multi_operation_planning
-from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation,NSGA_two_objectives
+from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation_MCMC_std,NSGA_two_objectives
 ###Decison Variables###
 path_test =  os.path.join(sys.path[0])
 editable_data_path =os.path.join(path_test, 'editable_values.csv')
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     #energy demands,solar irradiance, wind speed, and electricity emissions?
     if editable_data['Scenarios Generation/Reduction']=='yes':
         scenario_generation_operation.scenario_generation_results(path_test)
-        generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+        generated_scenario=uncertainty_analysis_operation_MCMC_std.UA_operation(int(editable_data['num_scenarios']))
         with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
             json.dump(generated_scenario, fp)
     #Do we need to perfrom the multi-objective optimization of operation planning using NSGA-II?
