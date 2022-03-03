@@ -76,7 +76,7 @@ import pandas as pd
 import csv
 import json
 import multi_operation_planning
-from multi_operation_planning import scenario_generation_operation, uncertainty_analysis_operation
+from multi_operation_planning import scenario_generation_operation, uncertainty_analysis_operation_MCMC_std
 ###Decison Variables###
 path_test =  os.path.join(sys.path[0])
 editable_data_path =os.path.join(path_test, 'editable_values.csv')
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     #Do we need to generate scenarios for uncertainties in ...
     #energy demands,solar irradiance, wind speed, and electricity emissions?
     scenario_generation_operation.scenario_generation_results(path_test)
-    generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+    generated_scenario=uncertainty_analysis_operation_MCMC_std.UA_operation(int(editable_data['num_scenarios']))
     with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
         json.dump(generated_scenario, fp)
 ```
@@ -143,7 +143,7 @@ import pandas as pd
 import csv
 import json
 import multi_operation_planning
-from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation,MILP_two_objective,MILP_results_repdays
+from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation_MCMC_std,MILP_two_objective,MILP_results_repdays
 editable_data_path =os.path.join(sys.path[0], 'editable_values.csv')
 editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
 path_test =  os.path.join(sys.path[0])
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     #energy demands,solar irradiance, wind speed, and electricity emissions?
     if editable_data['Generate Scenarios']=='yes':
         scenario_generation_operation.scenario_generation_results(path_test)
-        generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+        generated_scenario=uncertainty_analysis_operation_MCMC_std.UA_operation(int(editable_data['num_scenarios']))
         with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
             json.dump(generated_scenario, fp)
     #Do we need to perfrom the two stage stochastic programming using MILP solver (GLPK)?
@@ -179,7 +179,7 @@ import sys
 import csv
 import json
 import multi_operation_planning
-from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation,NSGA_two_objectives
+from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation_MCMC_std,NSGA_two_objectives
 ###Decison Variables###
 path_test =  os.path.join(sys.path[0])
 editable_data_path =os.path.join(path_test, 'editable_values.csv')
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     #energy demands,solar irradiance, wind speed, and electricity emissions?
     if editable_data['Generate Scenarios']=='yes':
         scenario_generation_operation.scenario_generation_results(path_test)
-        generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+        generated_scenario=uncertainty_analysis_operation_MCMC_std.UA_operation(int(editable_data['num_scenarios']))
         with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
             json.dump(generated_scenario, fp)
     #Do we need to perfrom the multi-objective optimization of operation planning using NSGA-II?
