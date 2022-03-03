@@ -68,7 +68,7 @@ The outcome of this code is a new folder with the name of the city in  the edita
 
 ### Part 2:  Scenario Generation/Reduction
 
-After the weather data is generated, we can perfrom scenario generation using Monte Carlo simulation and scenario reduction using k-mean algorithm to reduce the number of scenarios:
+After the weather data is generated, we can perfrom scenario generation using MCMC and scenario reduction using k-mean algorithm to reduce the number of scenarios:
 ```
 import os
 import sys
