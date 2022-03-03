@@ -30,8 +30,7 @@ lat = float(editable_data['Latitude'])
 lon = float(editable_data['Longitude'])
 city = editable_data['city']
 folder_path = os.path.join(path_test,str(city))
-max_electricity = int(editable_data['max_electricity'])
-max_heating = int(editable_data['max_heating'])
+
 def best_fit_distribution(data,ax=None):
   """Model data by finding best fit distribution to data"""
   # Get histogram of original data

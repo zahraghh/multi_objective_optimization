@@ -32,8 +32,6 @@ lat = float(editable_data['Latitude'])
 lon = float(editable_data['Longitude'])
 city = editable_data['city']
 folder_path = os.path.join(path_test,str(city))
-max_electricity = int(editable_data['max_electricity'])
-max_heating = int(editable_data['max_heating'])
 def best_fit_distribution(data,ax=None):
   """Model data by finding best fit distribution to data"""
   # Get histogram of original data
@@ -88,7 +86,7 @@ def LHS_generator(data,weather_input, num_scenarios_LHS,distribution=None):
     mean_data = round(np.mean(data),3)
     best_fit_name, best_fit_params = best_fit_distribution(data,ax_new)
     best_dist = getattr(st, best_fit_name)
-    num_scenarios_LHS = int(editable_data['num_scenarios_LHS'])
+    num_scenarios_LHS = int(editable_data['num_scenarios_intervals'])
     num_scenarios_revised = num_scenarios_LHS + 4
     #weather_data = pd.read_csv(os.path.join(os.path.join(os.path.join(path_test,'Weather files'),'AMYs'),epw_file_name+'.csv'))
     UA_scenario = []
@@ -188,7 +186,7 @@ def UA_operation(num_scenarios):
         wind_UA = weather_uncertain_input('wind_speed',8,represent_day,path_test)
         with open(os.path.join(path_test,'UA_wind.json'), 'w') as fp:
             json.dump(wind_UA, fp)
-    num_scenarios_LHS = int(editable_data['num_scenarios_LHS'])
+    num_scenarios_LHS = int(editable_data['num_scenarios_intervals'])
     num_clusters = int(editable_data['Cluster numbers'])+2
     demand_electricity_UA = defaultdict(lambda: defaultdict(list))
     demand_heating_UA = defaultdict(lambda: defaultdict(list))
