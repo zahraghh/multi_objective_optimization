@@ -2,7 +2,7 @@
 This repository provides a framework to perform multi-objective optimization of operation planning of district energy system using two methods, an MILP solver and NSGA-II algorithm. In this framework, we consider uncertainties in energy demands, solar irradiance, wind speed, and electricity emission factors using the Monte Carlo simulation. In this framework, the operation planning of energy components are optimized to minimize the operating cost and CO<sub>2</sub> emissions. Natural gas boilers, combined heating and power (CHP), solar photovoltaic (PV), wind turbines, batteries, and the grid are the energy components considered in this framework. 
 
 ## How Can I Install this Repository?
-To use this repository, you need to use either Python or Anaconda. You can download and install Python using the following link https://www.python.org/downloads/ or Anaconda using the following link https://docs.anaconda.com/anaconda/install/. 
+To use this repository, you need to use either Python or Anaconda. You can download and install Python using the following link https://www.python.org/downloads/ or Anaconda using the following link https://docs.anaconda.com/anaconda/install/. We perfromed the optimization on Python 3.7.
 
 Two packages should be installed using the conda or PyPI.
 
@@ -28,7 +28,7 @@ Download the ZIP file of this repository from this link: https://github.com/zahr
 
 Unzip the "multi_objective_optimization-Journal" folder and locally install the package using the pip command. The /path/to/multi_objective_optimization-Journal is the path to the "multi_objective_optimization-Journal" folder that contains a setup.py file. 
 ```
-pip install -e /path/to/multi_objective_optimization-Journal
+pip3 install -e /path/to/multi_objective_optimization-Journal
 
 ```
 
