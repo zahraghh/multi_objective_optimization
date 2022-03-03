@@ -144,6 +144,7 @@ def kmedoid_clusters(path_test):
         clusters_list.append(kmedoids.cluster_centers_[center].tolist())
     for scenario in range(len(A_scaled)):
         data_all_labels[kmedoids.labels_[scenario]].append(standardization_data.inverse_transform(A_scaled[scenario].reshape(1,-1)))
+        #print(data_all_labels)
         A_scaled_list[scenario]=A_scaled[scenario].tolist()
         A_scaled_list[scenario].insert(0,kmedoids.labels_[scenario])
         data_labels['labels '+str(scenario)]= A_scaled_list[scenario]
@@ -250,7 +251,15 @@ def kmedoid_clusters(path_test):
     design_day_heating = []
     design_day_electricity = []
     for i in range(24):
-        design_day_electricity.append(np.max([j for j in max_electricity_scenarios_nested_list[i] if j<max_electricity_hour]))
+        #print(max_electricity_scenarios_nested_list[i],max_electricity_hour)
+        if len(max_electricity_scenarios_nested_list[i])==1:
+            if max_electricity_scenarios_nested_list[i][0]<max_electricity_hour:
+                design_day_electricity.append(max_electricity_scenarios_nested_list[i][0])
+            else:
+                design_day_electricity.append(max_electricity_hour)
+
+        else:
+                design_day_electricity.append(np.max([j for j in max_electricity_scenarios_nested_list[i] if j<max_electricity_hour]))
         #print(i,len(max_heating_scenarios_nested_list[i]),max_heating_scenarios_nested_list[i])
         heating_dd = [j for j in max_heating_scenarios_nested_list[i] if j<max_heating_hour]
         #print(heating_dd)
