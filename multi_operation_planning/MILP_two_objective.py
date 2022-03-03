@@ -514,12 +514,8 @@ def results_repdays(path_test):
                     V_wind_now = data_now[3] #Wind Speed m/s in Slat Lake City from AMY file for 8760 hr in 2019
                 plt.plot(gti_list)
 
-    for represent in range(7,num_clusters):
-        if represent==7:
-            start_day=160
-        else:
-            start_day=0
-        for day in range(start_day,num_scenarios): #,num_scenarios
+    for represent in range(num_clusters):
+        for day in range(num_scenarios): #,num_scenarios
             E_bat = {}
             df_object = {}
             df_operation = {}
