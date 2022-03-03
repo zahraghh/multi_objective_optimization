@@ -10,8 +10,12 @@ import os
 import sys
 import pandas as pd
 import csv
+from collections import defaultdict
 from pathlib import Path
 import json
+import multi_operation_planning
+from multi_operation_planning import clustring_kmediod_PCA_operation
+
 def NSGA_Operation(path_test):
     editable_data_path =os.path.join(path_test, 'editable_values.csv')
     editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
@@ -87,26 +91,15 @@ def NSGA_Operation(path_test):
     lbstokg_convert = 0.453592 #1 l b = 0.453592 kg
     ###System Parameters## #
     year = int(editable_data['ending_year'])
+    city = editable_data['city']
+    city_EF = int(editable_data['city EF'])
+    lat = float(editable_data['Latitude'])
+    lon = float(editable_data['Longitude'])
+    folder_path = os.path.join(path_test,str(city))
     electricity_prices =  float(editable_data['electricity_price'])/100 #6.8cents/kWh in Utah -->$/kWh
     num_scenarios = int(editable_data['num_scenarios'])
-    with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json')) as f:
-        scenario_generated = json.load(f)
     num_clusters = int(editable_data['Cluster numbers'])+2
-    electricty_UA = []
-    heating_UA = []
-    for represent in range(num_clusters):
-        for day in range(num_scenarios):
-            for hour in range(0,24):
-                data_now = scenario_generated[str(represent)][str(day)][str(hour)]
-                electricty_UA.append(data_now[0])
-                heating_UA.append(data_now[1])
-
-    data_demand = {'Electricity (kWh)': electricty_UA,
-            'Heating (kWh)': heating_UA}
-    df_demand = pd.DataFrame(data_demand)
-    df_demand.to_csv(os.path.join(path_test , 'UA_demand.csv'))
-    min_electricity = 0
-    min_heating = 0
+    file_name = city+'Deter_EF_'+str(float(editable_data['renewable percentage']) )+'_operation_EA_'+str(editable_data['num_iterations'])+'_'+str(editable_data['population_size'])+'_'+str(editable_data['num_processors'])+'_processors'
     class Operation_EA(Problem):
         def __init__(self,G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heating_demand_new,electricity_EF):
             super(Operation_EA, self).__init__(1, 2, 2)  #Problem(2, 2, 2) to create a problem with two decision variables, two objectives, and two constraints, respectively.
@@ -155,7 +148,7 @@ def NSGA_Operation(path_test):
                 eff_CHP_therm = CHP_component['eff_CHP_therm'][index_CHP] #Thermal efficiency of CHP system Q/F
                 eff_CHP_elect = CHP_component['eff_CHP_elect'][index_CHP] #Electricity efficiency of CHP system P/F
                 OM_CHP =CHP_component['OM_CHP'][index_CHP] #cent/kWh to $/kWh. now is $/kWh
-                gamma_CHP =CHP_component['gamma_CHP'][index_CHP]*lbstokg_convert #
+                gamma_CHP =CHP_component['gamma_CHP'][index_CHP]*lbstokg_convert #lbs/kWh to kg/kWh.
                 E_CHP = F_CHP_size*eff_CHP_elect/100 #Electricty generation of CHP system kWh
                 Q_CHP = F_CHP_size*eff_CHP_therm/100 #Heat generation of CHP system kWh
                 #salvage_CHP = (lifespan_chp-lifespan_project+lifespan_chp*int(lifespan_project/lifespan_chp))/lifespan_chp
@@ -240,7 +233,7 @@ def NSGA_Operation(path_test):
             elif V_wind_now<cut_out_wind_speed and V_wind_now>rated_wind_speed:
                 E_wind = rated_power
             else:
-                E_wind = rated_power*((V_wind_now-cut_in_wind_speed)/(rated_wind_speed-cut_in_wind_speed))**3
+                E_wind = rated_power*(V_wind_now-cut_in_wind_speed)/(rated_wind_speed-cut_in_wind_speed)
             #E_wind = 0.5*C_p*rho*A_swept_size*V_wind_now**3/1000 #Wind generation from wind Turbine (kW) CHANGE V_wind
             #salvage_wind = 1-(lifespan_wind-lifespan_project+lifespan_wind*int(lifespan_project/lifespan_wind))/lifespan_wind
             #invest_wind = (IC_wind + OM_wind*UPV_maintenance)*CAP_wind #CAP_wind in kW + investment cost of wind in $
@@ -312,48 +305,51 @@ def NSGA_Operation(path_test):
         #df_operation_all.to_csv(os.path.join(results_path, str(hour)+'_sizing_all.csv'))
         #print('Results are generated for hour ' + str(hour) + ' in the ' + file_name+' folder')
         return df_object_all,df_operation_all
-    for represent in range(num_clusters):
-        for day in range(num_scenarios):
-            E_bat = {}
-            df_object = {}
-            df_operation = {}
-            for hour in range(0,24):
-                data_now = scenario_generated[str(represent)][str(day)][str(hour)]
-                electricity_demand_now = round(data_now[0],5) #kWh
-                heating_demand_now = round(data_now[1],5) #kWh
-                G_T_now = data_now[2] #Global Tilted Irradiation (Wh/m^2) in Slat Lake City from TMY3 file for 8760 hr a year on a titled surface 35 deg
-                V_wind_now = data_now[3] #Wind Speed m/s in Slat Lake City from AMY file for 8760 hr in 2019
-                electricity_EF = data_now[4]*renewable_percentage*lbstokg_convert/1000 #kg/kWh
-                #print('rep',represent,'demands',electricity_demand_now,heating_demand_now,G_T_now,V_wind_now,electricity_EF)
-                if hour==0:
-                    E_bat[hour]=0
-                if heating_demand_now<min_heating:
-                    heating_demand_now = min_heating
-                if electricity_demand_now<min_electricity:
-                    electricity_demand_now=min_electricity
-                if  G_T_now<0:
-                    G_T_now=0
-                if  V_wind_now<0:
-                    V_wind_now=0
-                #print(G_T_now,V_wind_now,E_bat[hour], electricity_demand_now,heating_demand_now,electricity_EF)
-                problem= Operation_EA(G_T_now,V_wind_now,round(E_bat[hour],5), electricity_demand_now,heating_demand_now,electricity_EF)
-                #with ProcessPoolEvaluator(int(editable_data['num_processors'])) as evaluator: #max number of accepted processors is 61 by program/ I have 8 processor on my PC
-                algorithm = NSGAII(problem,  population_size = int(editable_data['population_size'])) #5000 iteration
-                algorithm.run(int(editable_data['num_iterations']))
-                E_bat[hour+1] = round(problem.E_bat_new,5)
-                df_object_hour,df_operation_hour = results_extraction(hour, problem,algorithm,problem.solar_PV_generation,problem.wind_turbine_generation,E_bat[hour])
-                df_object[hour] = df_object_hour.sort_values(by = 'Cost ($)')
-                df_operation[hour] =df_operation_hour.sort_values(by = 'Cost ($)')
-                #print(hour,df_operation_hour['CHP Operation (kWh)'])
-                #print('cost',df_operation_hour['Cost ($)'])
+    weather_data = pd.read_csv(os.path.join(folder_path,city+'_'+str(lat)+'_'+str(lon)+'_psm3_60_'+str(year)+'.csv'), header=None)[2:]
+    solar_data = weather_data[46].tolist()
+    wind_data = weather_data[8].tolist()
+    solar_day =  defaultdict(lambda: defaultdict(list))
+    wind_day =  defaultdict(lambda: defaultdict(list))
+    energy_demands =pd.read_csv(os.path.join(path_test,'total_energy_demands.csv'))
+    for day in range(0,365):
+        hour = 0
+        for index_in_year in range(day*24,(day+1)*24):
+            solar_day[day][hour].append(float(solar_data[index_in_year]))
+            wind_day[day][hour].append(float(wind_data[index_in_year]))
+            hour +=1
+        hour =0
+    for day in range(0,365):
+        E_bat = {}
+        df_object = {}
+        df_operation = {}
+        for hour in range(0,24):
+            electricity_demand_now =energy_demands['Electricity (kWh)'][day*24+hour] + energy_demands['Cooling (kWh)'][day*24+hour] #kWh
+            heating_demand_now = energy_demands['Heating (kWh)'][day*24+hour] #kWh
+            G_T_now = solar_day[day][hour][0] #Global Tilted Irradiation (Wh/m^2) in Slat Lake City from TMY3 file for 8760 hr a year on a titled surface 35 deg
+            V_wind_now = wind_day[day][hour][0] #Wind Speed m/s in Slat Lake City from AMY file for 8760 hr in 2019
+            electricity_EF = city_EF*renewable_percentage*lbstokg_convert/1000 #kg/kWh
+            #print('rep',represent,'demands',electricity_demand_now,heating_demand_now,G_T_now,V_wind_now,electricity_EF)
+            if hour==0:
+                E_bat[hour]=0
+            #print(G_T_now,V_wind_now,E_bat[hour], electricity_demand_now,heating_demand_now,electricity_EF)
+            problem= Operation_EA(G_T_now,V_wind_now,round(E_bat[hour],5), electricity_demand_now,heating_demand_now,electricity_EF)
+            #with ProcessPoolEvaluator(int(editable_data['num_processors'])) as evaluator: #max number of accepted processors is 61 by program/ I have 8 processor on my PC
+            algorithm = NSGAII(problem,  population_size = int(editable_data['population_size'])) #5000 iteration
+            algorithm.run(int(editable_data['num_iterations']))
+            E_bat[hour+1] = round(problem.E_bat_new,5)
+            df_object_hour,df_operation_hour = results_extraction(hour, problem,algorithm,problem.solar_PV_generation,problem.wind_turbine_generation,E_bat[hour])
+            df_object[hour] = df_object_hour.sort_values(by = 'Cost ($)')
+            df_operation[hour] =df_operation_hour.sort_values(by = 'Cost ($)')
+            #print(hour,df_operation_hour['CHP Operation (kWh)'])
+            #print('cost',df_operation_hour['Cost ($)'])
 
-                if hour !=0:
-                    df_object[hour] = df_object[hour].add(df_object[hour-1])
-                    df_operation[hour] = df_operation[hour].add(df_operation[hour-1])
-            file_name = city+'_EF_'+str(float(editable_data['renewable percentage']) )+'_operation_EA_'+str(editable_data['num_iterations'])+'_'+str(editable_data['population_size'])+'_'+str(editable_data['num_processors'])+'_processors'
-            results_path = os.path.join(sys.path[0], file_name)
-            if not os.path.exists(results_path):
-                os.makedirs(results_path)
-            df_object[hour].to_csv(os.path.join(results_path , str(represent)+'_'+str(day)+'_represent_objectives.csv'), index=False)
-            df_operation[hour].to_csv(os.path.join(results_path, str(represent)+'_'+str(day)+'_represent_sizing_all.csv'), index=False)
-            #print(represent,day,df_object[hour])
+            if hour !=0:
+                df_object[hour] = df_object[hour].add(df_object[hour-1])
+                df_operation[hour] = df_operation[hour].add(df_operation[hour-1])
+        file_name = city+'_Alldays_EF_'+str(float(editable_data['renewable percentage']) )+'_operation_EA_'+str(editable_data['num_iterations'])+'_'+str(editable_data['population_size'])+'_'+str(editable_data['num_processors'])+'_processors'
+        results_path = os.path.join(sys.path[0], file_name)
+        if not os.path.exists(results_path):
+            os.makedirs(results_path)
+        df_object[hour].to_csv(os.path.join(results_path , str(day)+'_'+'_represent_objectives.csv'), index=False)
+        df_operation[hour].to_csv(os.path.join(results_path, str(day)+'_'+'_represent_sizing_all.csv'), index=False)
+        #print(represent,day,df_object[hour])

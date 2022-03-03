@@ -251,7 +251,15 @@ def kmedoid_clusters(path_test):
     design_day_heating = []
     design_day_electricity = []
     for i in range(24):
-        design_day_electricity.append(np.max([j for j in max_electricity_scenarios_nested_list[i] if j<max_electricity_hour]))
+        #print(max_electricity_scenarios_nested_list[i],max_electricity_hour)
+        if len(max_electricity_scenarios_nested_list[i])==1:
+            if max_electricity_scenarios_nested_list[i][0]<max_electricity_hour:
+                design_day_electricity.append(max_electricity_scenarios_nested_list[i][0])
+            else:
+                design_day_electricity.append(max_electricity_hour)
+
+        else:
+                design_day_electricity.append(np.max([j for j in max_electricity_scenarios_nested_list[i] if j<max_electricity_hour]))
         #print(i,len(max_heating_scenarios_nested_list[i]),max_heating_scenarios_nested_list[i])
         heating_dd = [j for j in max_heating_scenarios_nested_list[i] if j<max_heating_hour]
         #print(heating_dd)

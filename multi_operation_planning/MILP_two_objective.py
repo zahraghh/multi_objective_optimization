@@ -35,16 +35,14 @@ def CHP(CAP_CHP_elect_size,F_CHP_size):
         eff_CHP_therm = CHP_component['eff_CHP_therm'][index_CHP] #Thermal efficiency of CHP system Q/F
         eff_CHP_elect = CHP_component['eff_CHP_elect'][index_CHP] #Electricity efficiency of CHP system P/F
         OM_CHP =CHP_component['OM_CHP'][index_CHP] #cent/kWh to $/kWh. now is $/kWh
-        gamma_CHP =CHP_component['gamma_CHP'][index_CHP] #cent/kWh to $/kWh. now is $/kWh
+        gamma_CHP =CHP_component['gamma_CHP'][index_CHP]*lbstokg_convert #emissions lb/kWh to kg/kWh
         E_CHP = F_CHP_size*eff_CHP_elect/100 #Electricty generation of CHP system kWh
         Q_CHP = F_CHP_size*eff_CHP_therm/100 #Heat generation of CHP system kWh
-        #salvage_CHP = (lifespan_chp-lifespan_project+lifespan_chp*int(lifespan_project/lifespan_chp))/lifespan_chp
-        #invest_CHP = IC_CHP*CAP_CHP_elect_size #Investment cost of the CHP system $
-        invest_CHP = 1
-        OPC_CHP = NG_prices*F_CHP_size + OM_CHP*E_CHP#O&M cost of CHP system $
+        invest_CHP = IC_CHP*CAP_CHP_elect_size #Investment cost of the CHP system $
+        OPC_CHP =NG_prices*F_CHP_size + OM_CHP*E_CHP#O&M cost of CHP system $
         OPE_CHP = gamma_CHP*E_CHP # O&M emission of CHP system kg CO2
-        #print('CHP',CAP_CHP_elect_size,IC_CHP,eff_CHP_therm,eff_CHP_elect,OM_CHP,gamma_CHP)
         return E_CHP,Q_CHP,invest_CHP,OPC_CHP,OPE_CHP,CAP_CHP_elect_size/eff_CHP_elect*100,CAP_CHP_elect_size*eff_CHP_therm/eff_CHP_elect,eff_CHP_therm
+
 def NG_boiler(F_boilers,_CAP_boiler):
     BTUtokWh_convert = 0.000293071 # 1BTU = 0.000293071 kWh
     mmBTutoBTU_convert = 10**6
@@ -72,14 +70,25 @@ def wind_turbine_calc(A_swept_size,hour_of_day,electricity_demand_max,V_wind_now
     #UPV_maintenance = float(editable_data['UPV_maintenance']) #https://nvlpubs.nist.gov/nistpubs/ir/2019/NIST.IR.85-3273-34.pdf discount rate =3% page 7
     ###Wind Turbine###
     index_wind = list(wind_component['Swept Area m^2']).index(A_swept_size)
+    cut_in_wind_speed = wind_component['Cut-in Speed'][index_wind] #2.5 m/s is the minimum wind speed to run the wind turbines
+    cut_out_wind_speed= wind_component['Cut-out Speed'][index_wind]
+    rated_wind_speed = wind_component['Rated Speed'][index_wind]
+    rated_power = wind_component['Rated Power kW'][index_wind]
     CAP_wind = wind_component['Rated Power kW'][index_wind]
     IC_wind = wind_component['Investment Cost'][index_wind] #Wind turbine capital cost in Utah 2018 1740$/kW
-    rho = 1.2 #air density for wind turbines kg/m^3 CHANGE
+    #rho = 1.2 #air density for wind turbines kg/m^3 CHANGE
     OM_wind = 44 #fixed wind turbines O&M cost 44$/kW-year
-    C_p = 0.35 #Power coefficient default value of 0.35 in E+ CHANGE
-    if V_wind_now<cut_in_wind_speed:
+    #C_p = 0.35 #Power coefficient default value of 0.35 in E+ CHANGE
+    cut_out_wind_speed= wind_component['Cut-out Speed'][0]
+    if V_wind_now<cut_in_wind_speed or  V_wind_now>cut_out_wind_speed:
         V_wind_now = 0
-    E_wind = 0.5*C_p*rho*A_swept_size*V_wind_now**3/1000 #Wind generation from wind Turbine (kW) CHANGE V_wind
+        E_wind = 0
+    elif V_wind_now<cut_out_wind_speed and V_wind_now>rated_wind_speed:
+        E_wind = rated_power
+    else:
+        E_wind = rated_power*((V_wind_now-cut_in_wind_speed)/(rated_wind_speed-cut_in_wind_speed))**3
+
+    #E_wind = 0.5*C_p*rho*A_swept_size*V_wind_now**3/1000 #Wind generation from wind Turbine (kW) CHANGE V_wind
     #salvage_wind = 1-(lifespan_wind-lifespan_project+lifespan_wind*int(lifespan_project/lifespan_wind))/lifespan_wind
     #invest_wind = (IC_wind + OM_wind*UPV_maintenance)*CAP_wind #CAP_wind in kW + investment cost of wind in $
     invest_wind = 1
@@ -99,6 +108,8 @@ def solar_pv_calc(A_surf_size,hour_of_day,electricity_demand_max,G_T_now,GT_max)
     A_surf_max = electricity_demand_max/(GT_max*eff_module*eff_inverter/1000)
     #salvage_solar = 1-(lifespan_solar-lifespan_project+lifespan_solar*int(lifespan_project/lifespan_solar))/lifespan_solar
     E_solar = A_surf_size*G_T_now*eff_module*eff_inverter/1000 #Solar generation from PV system (kWh) CHANGE G_T
+    if E_solar>CAP_solar:
+        E_solar=CAP_solar
     #invest_solar  = (IC_solar*1000*salvage_solar+OM_solar*UPV_maintenance)*CAP_solar #CAP_solar in kW + investment cost of solar in $
     invest_solar=1
     #print('solar',IC_solar,OM_solar,eff_module,eff_inverter,A_surf_size)
@@ -197,11 +208,11 @@ if use_grid== 'yes':
 else:
     CAP_grid = 0 #means we cannot use the grid the optimization
 def Operation(hour, G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heating_demand,electricity_EF):
-    solar_PV_generation= solar_pv_calc(A_solar, hour,0,G_T_now,1)[0]
-    wind_turbine_generation = wind_turbine_calc(A_swept, hour,0,V_wind_now,1)[0]
+    solar_PV_generation= round(solar_pv_calc(A_solar, hour,0,G_T_now,1)[0],5)
+    wind_turbine_generation = round(wind_turbine_calc(A_swept, hour,0,V_wind_now,1)[0],5)
     battery_results = battery_calc(electricity_demand_now,hour,E_bat_now,CAP_battery,G_T_now,V_wind_now)
     electricity_demand_new = battery_results[2]
-    E_bat_new = battery_results[0]
+    E_bat_new = round(battery_results[0],5)
     energy_component_number = {}
     energy_component_type = 0
     model = pyo.ConcreteModel()
@@ -215,6 +226,10 @@ def Operation(hour, G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heatin
         F_F_CHP = 1
         CHP_model = model.F_CHP
         k=1
+        #if CHP(CAP_CHP_elect,CHP(CAP_CHP_elect,0)[5]/2)[1]>heating_demand:
+        #    F_F_CHP = 0
+        #    CHP_model = 0
+        #    k=0
     else:
         F_F_CHP = 0
         CHP_model = 0
@@ -253,17 +268,22 @@ def Operation(hour, G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heatin
         if i==0:
             CHP_model = 0
             Boiler_model = heating_demand
-        cost_objective = CHP(CAP_CHP_elect,CHP_model)[3]*F_F_CHP +NG_boiler(Boiler_model,CAP_boiler)[2]*F_F_CHP + grid_model*electricity_prices*F_E_grid
-        emissions_objective = CHP(CAP_CHP_elect,CHP_model*F_F_CHP)[4] + NG_boiler(Boiler_model*F_F_boiler,CAP_boiler)[3] +grid_model*electricity_EF*F_E_grid
+        CHP_model = round(CHP_model,5)
+        Boiler_model = round(Boiler_model,5)
+        grid_model = round(grid_model,5)
+        cost_objective = round(CHP(CAP_CHP_elect,CHP_model)[3]*F_F_CHP +NG_boiler(Boiler_model,CAP_boiler)[2]*F_F_CHP + grid_model*electricity_prices*F_E_grid,5)
+        emissions_objective = round(CHP(CAP_CHP_elect,CHP_model*F_F_CHP)[4] + NG_boiler(Boiler_model*F_F_boiler,CAP_boiler)[3] +grid_model*electricity_EF*F_E_grid,5)
         population_size = int(editable_data['population_size'])
         #print('CHP model',i,j,k,CHP_model,cost_objective)
         return 'cost',[cost_objective]*population_size,'emisisons',[emissions_objective]*population_size,'CHP',[CHP_model]*population_size,'Boilers',[Boiler_model]*population_size,'Grid',[grid_model]*population_size,E_bat_new,solar_PV_generation,wind_turbine_generation
+
+
     model.Constraint_elect = pyo.Constraint(expr = grid_model>=0) # Electricity balance of demand and supply sides
     model.Constraint_heat = pyo.Constraint(expr = Boiler_model>=0) # Heating balance of demand and supply sides
     model.f1_cost = pyo.Var()
     model.f2_emissions = pyo.Var()
-    model.C_f1_cost = pyo.Constraint(expr= model.f1_cost == CHP(CAP_CHP_elect,CHP_model)[3]*F_F_CHP +NG_boiler(Boiler_model,CAP_boiler)[2]*F_F_CHP + grid_model*electricity_prices*F_E_grid)
-    model.C_f2_emissions = pyo.Constraint(expr= model.f2_emissions == CHP(CAP_CHP_elect,CHP_model*F_F_CHP)[4] + NG_boiler(Boiler_model*F_F_boiler,CAP_boiler)[3] +grid_model*electricity_EF*F_E_grid)
+    model.C_f1_cost = pyo.Constraint(expr= model.f1_cost == 100000*(CHP(CAP_CHP_elect,CHP_model)[3]*F_F_CHP +NG_boiler(Boiler_model,CAP_boiler)[2]*F_F_CHP + grid_model*electricity_prices*F_E_grid))
+    model.C_f2_emissions = pyo.Constraint(expr= model.f2_emissions == 100000*(CHP(CAP_CHP_elect,CHP_model*F_F_CHP)[4] + NG_boiler(Boiler_model*F_F_boiler,CAP_boiler)[3] +grid_model*electricity_EF*F_E_grid))
     model.O_f1_cost = pyo.Objective(expr= model.f1_cost)
     model.O_f2_emissions = pyo.Objective(expr= model.f2_emissions)
     model.O_f2_emissions.deactivate()
@@ -283,6 +303,7 @@ def Operation(hour, G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heatin
     else:
         value_Boiler_model = 0
     if use_grid =='yes':
+        value_CHP_model = 0
         value_grid_model = electricity_demand_new - CHP(CAP_CHP_elect,value_CHP_model)[0]
     else:
         value_grid_model = 0
@@ -348,16 +369,18 @@ def Operation(hour, G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heatin
     #print('cost range',str(f1_min)+', ' + str(f1_max))
     n = int(editable_data['population_size'])-2
     step = int((f2_max - f2_min) / n)
+    #print('eval',f2_max,f2_min,step)
     if step==0:
-        CHP_EC = [value_CHP_model]*(n+2)
-        Boiler_EC = [value_Boiler_model]*(n+2)
-        grid_EC = [value_grid_model]*(n+2)
-        cost_objective_single = CHP(CAP_CHP_elect,value_CHP_model)[3]*F_F_CHP +NG_boiler(value_Boiler_model,CAP_boiler)[2]*F_F_CHP + value_grid_model*electricity_prices*F_E_grid
-        emissions_objective_single = CHP(CAP_CHP_elect,value_CHP_model*F_F_CHP)[4] + NG_boiler(value_Boiler_model*F_F_boiler,CAP_boiler)[3] +value_grid_model*electricity_EF*F_E_grid
+        CHP_EC = [round(value_CHP_model,5)]*(n+2)
+        Boiler_EC = [round(value_Boiler_model,5)]*(n+2)
+        grid_EC = [round(value_grid_model,5)]*(n+2)
+        cost_objective_single = round((CHP(CAP_CHP_elect,value_CHP_model)[3]*F_F_CHP +NG_boiler(value_Boiler_model,CAP_boiler)[2]*F_F_CHP + value_grid_model*electricity_prices*F_E_grid),5)
+        emissions_objective_single =  round(CHP(CAP_CHP_elect,value_CHP_model*F_F_CHP)[4] + NG_boiler(value_Boiler_model*F_F_boiler,CAP_boiler)[3] +value_grid_model*electricity_EF*F_E_grid,5)
         cost_objective = [cost_objective_single]*(n+2)
         emissions_objective = [emissions_objective_single]*(n+2)
     else:
         steps = list(range(int(f2_min),int(f2_max),step)) + [f2_max]
+
         CHP_EC = []
         Boiler_EC = []
         grid_EC = []
@@ -369,26 +392,29 @@ def Operation(hour, G_T_now,V_wind_now,E_bat_now, electricity_demand_now, heatin
             results =opt.solve(model,load_solutions=False)
             model.solutions.load_from(results)
             if use_CHP=='yes':
-                value_CHP_model=model.F_CHP.value
+                value_CHP_model=round(model.F_CHP.value,5)
                 if CAP_CHP_elect==0:
                     value_CHP_model=0
             else:
                 value_CHP_model = 0
             if use_boilers == 'yes':
-                value_Boiler_model = heating_demand - CHP(CAP_CHP_elect,value_CHP_model)[1]
+                value_Boiler_model = round(heating_demand - CHP(CAP_CHP_elect,value_CHP_model)[1],5)
                 if CAP_boiler==0:
                     value_Boiler_model=0
             else:
                 value_Boiler_model = 0
             if use_grid =='yes':
-                value_grid_model = electricity_demand_new - CHP(CAP_CHP_elect,value_CHP_model)[0]
+                value_grid_model = round(electricity_demand_new - CHP(CAP_CHP_elect,value_CHP_model)[0],5)
             else:
                 value_grid_model = 0
+            value_CHP_model = round(value_CHP_model,5)
+            value_Boiler_model = round(value_Boiler_model,5)
+            value_grid_model = round(value_grid_model,5)
             CHP_EC.append(value_CHP_model)
             Boiler_EC.append(value_Boiler_model)
             grid_EC.append(value_grid_model)
-            cost_objective.append(CHP(CAP_CHP_elect,value_CHP_model)[3]*F_F_CHP +NG_boiler(value_Boiler_model,CAP_boiler)[2]*F_F_CHP + value_grid_model*electricity_prices*F_E_grid)
-            emissions_objective.append(CHP(CAP_CHP_elect,value_CHP_model*F_F_CHP)[4] + NG_boiler(value_Boiler_model*F_F_boiler,CAP_boiler)[3] +value_grid_model*electricity_EF*F_E_grid)
+            cost_objective.append(round((CHP(CAP_CHP_elect,value_CHP_model)[3]*F_F_CHP +NG_boiler(value_Boiler_model,CAP_boiler)[2]*F_F_CHP + value_grid_model*electricity_prices*F_E_grid),5))
+            emissions_objective.append(round(CHP(CAP_CHP_elect,value_CHP_model*F_F_CHP)[4] + NG_boiler(value_Boiler_model*F_F_boiler,CAP_boiler)[3] +value_grid_model*electricity_EF*F_E_grid,5))
         #print('normal $\epsilon$-Constraint')
         #print(Boiler_EC)
         #print(grid_EC)
@@ -442,12 +468,86 @@ def results_extraction(hour, results,E_bat):
     grid_results = {}
     data_object = {'Cost ($)':results[1],
     'Emission (kg CO2)':results[3]}
-    data_operation={'Solar Generation (kWh)':results[11],
-    'Wind Generation (kWh)':results[12],
+    data_operation={'Solar Generation (kWh)':round(results[11],5),
+    'Wind Generation (kWh)':round(results[12],5),
     'CHP Operation (kWh)':results[5],
     'Boilers Operation (kWh)':results[7],
-    'Battery Operation (kWh)':E_bat,
+    'Battery Operation (kWh)':round(E_bat,5),
     'Grid Operation (kWh)':results[9],
     'Cost ($)':results[1],
     'Emission (kg CO2)':results[3]}
     return pd.DataFrame(data_object),pd.DataFrame(data_operation)
+lbstokg_convert = 0.453592 #1 l b = 0.453592 kg
+def results_repdays(path_test):
+    components_path = os.path.join(path_test,'Energy Components')
+    editable_data_path =os.path.join(path_test, 'editable_values.csv')
+    editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
+    city = editable_data['city']
+    num_components = 0
+    representative_days_path = os.path.join(path_test,'Scenario Generation',city, 'Representative days')
+    renewable_percentage = float(editable_data['renewable percentage'])  #Amount of renewables at the U (100% --> 1,mix of 43% grid--> 0.463, mix of 29% grid--> 0.29, 100% renewables -->0)
+    ###System Parameters## #
+    year = int(editable_data['ending_year'])
+    electricity_prices =  float(editable_data['electricity_price'])/100 #6.8cents/kWh in Utah -->$/kWh CHANGE
+    num_clusters = int(editable_data['Cluster numbers'])+2
+    num_scenarios = int(editable_data['num_scenarios'])
+    min_electricity = 0
+    min_heating = 0
+    with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json')) as f:
+        scenario_generated = json.load(f)
+    key_function = 'yes'
+    if key_function=='yes':
+        for day in range(num_scenarios): #,num_scenarios
+            for represent in range(num_clusters):
+                E_bat = {}
+                df_object = {}
+                df_operation = {}
+                gti_list = []
+                for hour in range(0,24):
+                    data_now = scenario_generated[str(represent)][str(day)][str(hour)]
+                    electricity_demand_now =data_now[0] #kWh
+                    heating_demand_now = data_now[1] #kWh
+                    G_T_now = data_now[2] #Global Tilted Irradiatio n (Wh/m^2) in Slat Lake City from TMY3 file for 8760 hr a year on a titled surface 35 deg
+                    gti_list.append(G_T_now)
+                    V_wind_now = data_now[3] #Wind Speed m/s in Slat Lake City from AMY file for 8760 hr in 2019
+                plt.plot(gti_list)
+
+    for represent in range(num_clusters):
+        for day in range(num_scenarios): #,num_scenarios
+            E_bat = {}
+            df_object = {}
+            df_operation = {}
+            for hour in range(0,24):
+                data_now = scenario_generated[str(represent)][str(day)][str(hour)]
+                electricity_demand_now =data_now[0] #kWh
+                heating_demand_now = data_now[1] #kWh
+                G_T_now = data_now[2] #Global Tilted Irradiatio n (Wh/m^2) in Slat Lake City from TMY3 file for 8760 hr a year on a titled surface 35 deg
+                V_wind_now = data_now[3] #Wind Speed m/s in Slat Lake City from AMY file for 8760 hr in 2019
+
+                electricity_EF = data_now[4]*renewable_percentage*lbstokg_convert/1000 #kg/kWh
+                if hour==0:
+                    E_bat[hour]=0
+                if heating_demand_now<min_heating:
+                    heating_demand_now = min_heating
+                if electricity_demand_now<min_electricity:
+                    electricity_demand_now=min_electricity
+                if  G_T_now<0:
+                    G_T_now=0
+                if  V_wind_now<0:
+                    V_wind_now=0
+                results = Operation(hour, G_T_now,V_wind_now,E_bat[hour], electricity_demand_now, heating_demand_now,electricity_EF)
+                E_bat[hour+1] = results[10]
+                df_object_hour, df_operation_hour = results_extraction(hour, results,E_bat[hour])
+                df_object[hour] = df_object_hour
+                df_operation[hour] =df_operation_hour
+                if hour !=0:
+                    df_object[hour] = df_object[hour].add(df_object[hour-1])
+                    df_operation[hour] = df_operation[hour].add(df_operation[hour-1])
+
+            file_name = city+'_EF_'+str(float(editable_data['renewable percentage']) )+'_operation_MILP_'+str(editable_data['num_iterations'])+'_'+str(editable_data['population_size'])+'_'+str(editable_data['num_processors'])+'_processors'
+            results_path = os.path.join(path_test, file_name)
+            if not os.path.exists(results_path):
+                os.makedirs(results_path)
+            #print(str(represent)+'_'+str(day),df_object[hour])
+            df_object[hour].to_csv(os.path.join(results_path , str(represent)+'_'+str(day)+'_represent_objectives.csv'), index=False)
+            df_operation[hour].to_csv(os.path.join(results_path, str(represent)+'_'+str(day)+'_represent_sizing_all.csv'), index=False)
