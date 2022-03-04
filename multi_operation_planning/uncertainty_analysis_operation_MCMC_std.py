@@ -259,8 +259,6 @@ def UA_operation(num_scenarios):
                     if hour==0:
                         if round(generated_day[cluster][hour][1][scenario_1],3)<0:
                             generated_day[cluster][hour][1][scenario_1]=0
-                        elif round(generated_day[cluster][hour][1][scenario_1],3)>max_heating:
-                            generated_day[cluster][hour][1][scenario_1] = max_heating
                         s1.append(round(generated_day[cluster][hour][1][scenario_0],3))
                         accept_1 = rand_1
                     else:
