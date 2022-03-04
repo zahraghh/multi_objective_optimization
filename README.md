@@ -1,8 +1,8 @@
 # Multi-objective Optimization of Operation Planning
-This repository provides a framework to perform multi-objective optimization of operation planning of district energy system using two methods, an MILP solver and NSGA-II algorithm. In this framework, we consider uncertainties in energy demands, solar irradiance, wind speed, and electricity emission factors using the Monte Carlo simulation. In this framework, the operation planning of energy components are optimized to minimize the operating cost and CO<sub>2</sub> emissions. Natural gas boilers, combined heating and power (CHP), solar photovoltaic (PV), wind turbines, batteries, and the grid are the energy components considered in this framework. 
+This repository provides a framework to perform multi-objective optimization of operation planning of district energy system using two methods, an MILP solver and NSGA-II algorithm. In this framework, we consider uncertainties in energy demands, solar irradiance, wind speed, and electricity emission factors using the Monte Carlo Markov chain (MCMC) method. In this framework, the operation planning of energy components are optimized to minimize the operating cost and CO<sub>2</sub> emissions. Natural gas boilers, combined heating and power (CHP), solar photovoltaic (PV), wind turbines, batteries, and the grid are the energy components considered in this framework. 
 
 ## How Can I Install this Repository?
-To use this repository, you need to use either Python or Anaconda. You can download and install Python using the following link https://www.python.org/downloads/ or Anaconda using the following link https://docs.anaconda.com/anaconda/install/. We perfromed the optimization on Python 3.7.
+To use this repository, you need to use either Python or Anaconda. You can download and install Python using the following link https://www.python.org/downloads/ or Anaconda using the following link https://docs.anaconda.com/anaconda/install/. We used Python 3.7 to perform the optimization.
 
 Two packages should be installed using the conda or PyPI.
 
@@ -12,7 +12,7 @@ conda install -c conda-forge scikit-learn-extra
 ```
 or from PyPI:
 ```
-pip install scikit-learn-extra
+pip3 install scikit-learn-extra
 ```
 2. install a solver that is free and open-source either in conda environmnet:
 ```
@@ -20,7 +20,7 @@ conda install glpk --channel conda-forge
 ```
 or from PyPI:
 ```
-pip install glpk
+pip3 install glpk
 ```
 
 Download the ZIP file of this repository from this link: https://github.com/zahraghh/multi_objective_optimization
@@ -68,7 +68,7 @@ The outcome of this code is a new folder with the name of the city in  the edita
 
 ### Part 2:  Scenario Generation/Reduction
 
-After the weather data is generated, we can perfrom scenario generation using Monte Carlo simulation and scenario reduction using k-mean algorithm to reduce the number of scenarios:
+After the weather data is generated, we can perfrom scenario generation using MCMC and scenario reduction using k-mean algorithm to reduce the number of scenarios:
 ```
 import os
 import sys
@@ -76,7 +76,7 @@ import pandas as pd
 import csv
 import json
 import multi_operation_planning
-from multi_operation_planning import scenario_generation_operation, uncertainty_analysis_operation
+from multi_operation_planning import scenario_generation_operation, uncertainty_analysis_operation_MCMC_std
 ###Decison Variables###
 path_test =  os.path.join(sys.path[0])
 editable_data_path =os.path.join(path_test, 'editable_values.csv')
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     #Do we need to generate scenarios for uncertainties in ...
     #energy demands,solar irradiance, wind speed, and electricity emissions?
     scenario_generation_operation.scenario_generation_results(path_test)
-    generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+    generated_scenario=uncertainty_analysis_operation_MCMC_std.UA_operation(int(editable_data['num_scenarios']))
     with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
         json.dump(generated_scenario, fp)
 ```
@@ -143,7 +143,7 @@ import pandas as pd
 import csv
 import json
 import multi_operation_planning
-from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation,MILP_two_objective,MILP_results_repdays
+from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation_MCMC_std,MILP_two_objective,MILP_results_repdays
 editable_data_path =os.path.join(sys.path[0], 'editable_values.csv')
 editable_data = pd.read_csv(editable_data_path, header=None, index_col=0, squeeze=True).to_dict()[1]
 path_test =  os.path.join(sys.path[0])
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     #energy demands,solar irradiance, wind speed, and electricity emissions?
     if editable_data['Generate Scenarios']=='yes':
         scenario_generation_operation.scenario_generation_results(path_test)
-        generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+        generated_scenario=uncertainty_analysis_operation_MCMC_std.UA_operation(int(editable_data['num_scenarios']))
         with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
             json.dump(generated_scenario, fp)
     #Do we need to perfrom the two stage stochastic programming using MILP solver (GLPK)?
@@ -179,7 +179,7 @@ import sys
 import csv
 import json
 import multi_operation_planning
-from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation,NSGA_two_objectives
+from multi_operation_planning import download_windsolar_data, GTI, scenario_generation_operation, uncertainty_analysis_operation_MCMC_std,NSGA_two_objectives
 ###Decison Variables###
 path_test =  os.path.join(sys.path[0])
 editable_data_path =os.path.join(path_test, 'editable_values.csv')
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     #energy demands,solar irradiance, wind speed, and electricity emissions?
     if editable_data['Generate Scenarios']=='yes':
         scenario_generation_operation.scenario_generation_results(path_test)
-        generated_scenario=uncertainty_analysis_operation.UA_operation(int(editable_data['num_scenarios']))
+        generated_scenario=uncertainty_analysis_operation_MCMC_std.UA_operation(int(editable_data['num_scenarios']))
         with open(os.path.join(path_test,'UA_operation_'+str(num_scenarios)+'.json'), 'w') as fp:
             json.dump(generated_scenario, fp)
     #Do we need to perfrom the multi-objective optimization of operation planning using NSGA-II?
